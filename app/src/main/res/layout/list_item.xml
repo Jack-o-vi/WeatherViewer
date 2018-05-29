@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/conditionImageView"
         android:layout_width="@dimen/image_side_length"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:contentDescription="@string/weather_condition_image"
-        android:scaleType="fitCenter" android:src="@mipmap/ic_launcher" />
+        android:scaleType="fitCenter"
+        android:src="@mipmap/ic_launcher" />
 
     <GridLayout
         android:layout_width="0dp"
