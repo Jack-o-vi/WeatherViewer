@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,27 +38,32 @@ public class MainActivity extends AppCompatActivity {
     // Adapter binds Weather`s objects with ListView elements
     private WeatherArrayAdapter weatherArrayAdapter;
     private ListView weatherListView;
-
+    public final static String TAG = "[MainActivity] MyLOGS";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
+       Log.d(TAG, "Find ListView and set to it the weatherArrayAdapter");
 
         weatherListView = (ListView) findViewById(R.id.weatherListView);
-        weatherArrayAdapter = new WeatherArrayAdapter(this, R.layout.list_item, weatherList);
+        weatherArrayAdapter = new WeatherArrayAdapter(this, weatherList);
         weatherListView.setAdapter(weatherArrayAdapter);
+
+        Log.d(TAG, "Add element to list and call notifyDataChanged");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "Get EditView and URL");
                 EditText locationEditText = (EditText) findViewById(R.id.locationEditText);
                 URL url = createURL(locationEditText.getText().toString());
-
+                Log.d(TAG, "URL == " + url.toString());
                 // Hide keyboard and run GetWeatherTask for getting weather data from OpenWeatherMap in the separate thread
                 if (url != null) {
+                    Log.d(TAG, "Dismiss keyboard and run teh GetWeatherTask");
                     dismissKeyboard(locationEditText);
                     GetWeatherTask getlocalWeatherTask = new GetWeatherTask();
                     getlocalWeatherTask.execute(url);
@@ -75,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         // units can take imperial (F), metric (C), standard (K)
         // cnt - days in the weather condition
         // APPID - key of te API
-        final String requestCityProp = "&units=imperial&cnt=16&APPID=";
+        final String requestCityProp = "&units=metric&cnt=16&APPID=";
         try {
             String encCity = URLEncoder.encode(city, "UTF-8");
             String urlString = baseURL + encCity + requestCityProp + apiKey;
@@ -118,15 +125,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class GetWeatherTask extends AsyncTask<URL, Void, JSONObject> {
+        private final static String TAG_GetWeatherTask = "[MainActivity.GetWeatherTask]";
+
         @Override
         protected JSONObject doInBackground(URL... urls) {
-
+            Log.d(TAG_GetWeatherTask, "doInBackground ");
             HttpURLConnection connection = null;
 
             try {
+                Log.d(TAG_GetWeatherTask, "doInBackground() url[0].openConnection() " + urls[0].toString());
                 connection = (HttpURLConnection) urls[0].openConnection();
                 int response = connection.getResponseCode();
 
+                Log.d(TAG_GetWeatherTask, "doInBackground responseCode == " + response);
                 if (response == HttpURLConnection.HTTP_OK) {
                     StringBuilder builder = new StringBuilder();
 
@@ -136,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                         while ((line = reader.readLine()) != null) {
                             builder.append(line);
                         }
+                        Log.d(TAG_GetWeatherTask, "doInBackground() JSON doc: " + builder.toString());
                     } catch (IOException e) {
                         Snackbar.make(findViewById(R.id.coordinatorLayout), R.string.read_error, Snackbar.LENGTH_LONG).show();
                         e.printStackTrace();
@@ -158,12 +170,18 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
+            Log.d(TAG_GetWeatherTask, "onPostExecute()  convertJSONtoArrayList");
             //super.onPostExecute(jsonObject);
             if (jsonObject != null) {
                 convertJSONtoArrayList(jsonObject);
 
+                Log.d(TAG_GetWeatherTask, "onPostExecute()  weatherArrayAdapter.notifyDataSetChanged();");
                 weatherArrayAdapter.notifyDataSetChanged(); // Bind with ListView
+                //weatherArrayAdapter.getView()
                 weatherListView.smoothScrollToPosition(0);
+                Log.d(TAG_GetWeatherTask, "onPostExecute()  weatherArrayAdapter.notifyDataSetChanged() Done");
+                //Log.d(TAG_GetWeatherTask, "onPostExecute()  try to set adapter");
+              //  weatherListView.setAdapter(weatherArrayAdapter);
             } else
                 Snackbar.make(findViewById(R.id.coordinatorLayout), R.string.connect_error, Snackbar.LENGTH_LONG).show();
 
@@ -172,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Creating Weather`s objects using JSONObject with condition
         private void convertJSONtoArrayList(JSONObject forecast) {
+            Log.d(TAG_GetWeatherTask, "convertJSONtoArrayList()  weatherList.clear(), elements: " + weatherList.toString());
             weatherList.clear();
 
             try {
@@ -191,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
                             main.getDouble("humidity"),
                             weather.getString("description"),
                             weather.getString("icon")));
+                    Log.d(TAG_GetWeatherTask, "convertJSONtoArrayList()  weatherList.add(), elements: " + Arrays.toString(new List[]{weatherList}));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
