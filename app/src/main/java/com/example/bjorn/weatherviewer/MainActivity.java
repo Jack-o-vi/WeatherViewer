@@ -47,34 +47,37 @@ public class MainActivity extends AppCompatActivity {
         //setSupportActionBar(toolbar);
        Log.d(TAG, "Find ListView and set to it the weatherArrayAdapter");
 
-        weatherListView = (ListView) findViewById(R.id.weatherListView);
+        weatherListView =  findViewById(R.id.weatherListView);
         weatherArrayAdapter = new WeatherArrayAdapter(this, weatherList);
         weatherListView.setAdapter(weatherArrayAdapter);
 
         Log.d(TAG, "Add element to list and call notifyDataChanged");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "Get EditView and URL");
-                EditText locationEditText = (EditText) findViewById(R.id.locationEditText);
-                URL url = createURL(locationEditText.getText().toString());
-                Log.d(TAG, "URL == " + url.toString());
-                // Hide keyboard and run GetWeatherTask for getting weather data from OpenWeatherMap in the separate thread
-                if (url != null) {
-                    Log.d(TAG, "Dismiss keyboard and run teh GetWeatherTask");
-                    dismissKeyboard(locationEditText);
-                    GetWeatherTask getlocalWeatherTask = new GetWeatherTask();
-                    getlocalWeatherTask.execute(url);
-                } else {
-                    Snackbar.make(findViewById(R.id.coordinatorLayout), R.string.invalid_url, Snackbar.LENGTH_LONG).show();
-                }
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> {
+            Log.d(TAG, "Get EditView and URL");
+            EditText locationEditText =  findViewById(R.id.locationEditText);
+            URL url = createURL(locationEditText.getText().toString());
 
+            // Hide keyboard and run GetWeatherTask for getting weather data from OpenWeatherMap in the separate thread
+            if (url != null) {
+                Log.d(TAG, "URL == " + url.toString());
+                Log.d(TAG, "Dismiss keyboard and run teh GetWeatherTask");
+                dismissKeyboard(locationEditText);
+                GetWeatherTask getlocalWeatherTask = new GetWeatherTask();
+                getlocalWeatherTask.execute(url);
+            } else {
+                Snackbar.make(findViewById(R.id.coordinatorLayout), R.string.invalid_url, Snackbar.LENGTH_LONG).show();
             }
+
         });
     }
 
+    /**
+     *
+     * @param city
+     * @return
+     */
     private URL createURL(String city) {
         String apiKey = getString(R.string.api_key);
         String baseURL = getString(R.string.web_service_url);
@@ -97,9 +100,16 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    /**
+     *
+     * @param view is aa edit field View
+     */
     private void dismissKeyboard(View view) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        if(imm != null){
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+
     }
 
     @Override
@@ -124,6 +134,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * @author Bjorn
+     */
     private class GetWeatherTask extends AsyncTask<URL, Void, JSONObject> {
         private final static String TAG_GetWeatherTask = "[MainActivity.GetWeatherTask]";
 

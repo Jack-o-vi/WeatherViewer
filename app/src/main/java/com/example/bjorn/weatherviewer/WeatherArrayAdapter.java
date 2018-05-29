@@ -23,19 +23,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Child class of ArrayAdapter, which binds list objects with listviews.
+ *
+ * @author Bjorn
+ * @version 2.0
+ */
 public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
 
-    public final static String TAG = "[WeatherArrayAdapter] MyLOGS";
+    // Logging tag
+    private final static String TAG = "[WeatherArrayAdapter] MyLOGS";
+
+    // HashMap of bitmaps
     private Map<String, Bitmap> bitmaps = new HashMap<>();
 
-    public WeatherArrayAdapter(Context context, List<Weather> forecast) {
+    WeatherArrayAdapter(Context context, List<Weather> forecast) {
         super(context, -1, forecast);
         Log.d(TAG, "WeatherArrayAdapter.super(context, -1, forecast)");
-    }
-
-    public WeatherArrayAdapter(Context context, int resource, List<Weather> forecast) {
-        super(context, resource, forecast);
-        Log.d(TAG, "WeatherArrayAdapter.super(context, resource, forecast)");
     }
 
     @NonNull
@@ -56,7 +60,7 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
             LayoutInflater inflater = LayoutInflater.from(getContext());
 
             convertView = inflater.inflate(R.layout.list_item, parent, false);
-            viewHolder.conditionImageView = (ImageView) convertView.findViewById(R.id.conditionImageView);
+            viewHolder.conditionImageView = convertView.findViewById(R.id.conditionImageView);
             viewHolder.dayTextView = convertView.findViewById(R.id.dayTextView);
             viewHolder.lowTextView = convertView.findViewById(R.id.lowTextView);
             viewHolder.hiTextView = convertView.findViewById(R.id.hiTextView);
@@ -66,24 +70,35 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        // Если значок погодных условй уже загружен, использует его:
-        // в противном случае загрузить в отдельном потоке
-        if (bitmaps.containsKey(day.iconURL)) {
+        /*
+        Если значок погодных условй уже загружен, использует его:
+        в противном случае загрузить в отдельном потоке
+        */
+
+        if (day != null && bitmaps.containsKey(day.iconURL)) {
             viewHolder.conditionImageView.setImageBitmap(bitmaps.get(day.iconURL));
-        } else {
+        } else if(day != null){
             // Download and output logo of weather condition
             new LoadImageTask(viewHolder.conditionImageView).execute(day.iconURL);
         }
 
         // Get data from Weather`s object and fill views
         Context context = getContext();
-        viewHolder.dayTextView.setText(context.getString(R.string.day_description, day.dayOfWeek, day.description));
-        viewHolder.lowTextView.setText(context.getString(R.string.low_temp, day.minTemp));
-        viewHolder.hiTextView.setText(context.getString(R.string.high_temp, day.maxTemp));
-        viewHolder.humidity.setText(context.getString(R.string.humidity, day.humidity));
+        if(day != null){
+            viewHolder.dayTextView.setText(context.getString(R.string.day_description, day.dayOfWeek, day.description));
+            viewHolder.lowTextView.setText(context.getString(R.string.low_temp, day.minTemp));
+            viewHolder.hiTextView.setText(context.getString(R.string.high_temp, day.maxTemp));
+            viewHolder.humidity.setText(context.getString(R.string.humidity, day.humidity));
+        }
+
         return convertView;
     }
 
+    /**
+     * ViewHolder  is a class which contains of views, which will be used with adapter.
+     *
+     * @author Bjorn
+     */
     private static class ViewHolder {
         ImageView conditionImageView;
         TextView dayTextView;
@@ -91,12 +106,17 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
         TextView hiTextView;
         TextView humidity;
 
-        public ViewHolder() {
+        ViewHolder() {
             Log.d(TAG, "ViewHolder()");
         }
     }
 
 
+    /**
+     * Class works in background and binds ImageView with bitmaps from weather site.
+     *
+     * @author Bjorn
+     */
     private class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
         public static final String TAG_LoadImageTask = "LoadImageTask";
         private ImageView imageView;
