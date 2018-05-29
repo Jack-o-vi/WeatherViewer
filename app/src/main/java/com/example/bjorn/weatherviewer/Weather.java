@@ -33,8 +33,8 @@ public class Weather {
         numberFormat.setMaximumFractionDigits(0);
 
         this.dayOfWeek = convertTimeStampToDay(timeStamp);
-        this.minTemp = numberFormat.format(minTemp)+"\u00B0F";
-        this.maxTemp = numberFormat.format(maxTemp)+"\u00B0F";
+        this.minTemp = numberFormat.format(minTemp)+"\u00B0C";
+        this.maxTemp = numberFormat.format(maxTemp)+"\u00B0C";
         this.humidity = NumberFormat.getPercentInstance().format(humidity/100.0);
         this.description = description;
         this.iconURL = "http://openweathermap.org/img/w/"+ iconName + ".png";
@@ -62,6 +62,15 @@ public class Weather {
         this.iconURL = iconURL;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Weather{" +
+                "dayOfWeek='" + dayOfWeek + '\'' +
+                ", minTemp='" + minTemp + '\'' +
+                ", maxTemp='" + maxTemp + '\'' +
+                ", humidity='" + humidity + '\'' +
+                ", description='" + description + '\'' +
+                ", iconURL='" + iconURL + '\'' +
+                '}';
+    }
 }
