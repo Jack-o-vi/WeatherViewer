@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,21 +25,29 @@ import java.util.Map;
 
 public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
 
+    public final static String TAG = "[WeatherArrayAdapter] MyLOGS";
     private Map<String, Bitmap> bitmaps = new HashMap<>();
 
     public WeatherArrayAdapter(Context context, List<Weather> forecast) {
         super(context, -1, forecast);
+        Log.d(TAG, "WeatherArrayAdapter.super(context, -1, forecast)");
     }
-    public WeatherArrayAdapter(Context context,int resource,  List<Weather> forecast) {
+
+    public WeatherArrayAdapter(Context context, int resource, List<Weather> forecast) {
         super(context, resource, forecast);
+        Log.d(TAG, "WeatherArrayAdapter.super(context, resource, forecast)");
     }
+
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+        Log.d(TAG, "getView() weatherList.getItem(position)");
         Weather day = getItem(position);
 
         ViewHolder viewHolder;
 
+        Log.d(TAG, "getView() convertView == null" + (convertView == null));
         // Проверить возможность повтороного использования ViewHolder
         // для элемента, вышедшего за граниы экрана
         if (convertView == null) {
@@ -82,24 +91,30 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
         TextView hiTextView;
         TextView humidity;
 
+        public ViewHolder() {
+            Log.d(TAG, "ViewHolder()");
+        }
     }
 
 
     private class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
-
+        public static final String TAG_LoadImageTask = "LoadImageTask";
         private ImageView imageView;
 
         public LoadImageTask(ImageView imageView) {
+            Log.d(TAG_LoadImageTask, "LoadImageTask(ImageView)");
             this.imageView = imageView;
         }
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
+            Log.d(TAG_LoadImageTask, "onPostExecute() setImageBitmap");
             imageView.setImageBitmap(bitmap);
         }
 
         @Override
         protected Bitmap doInBackground(String... params) {
+            Log.d(TAG_LoadImageTask, "doInBackground() connecting to server for getting images for weather");
             Bitmap bitmap = null;
             HttpURLConnection connection = null;
 
@@ -108,7 +123,7 @@ public class WeatherArrayAdapter extends ArrayAdapter<Weather> {
 
                 connection = (HttpURLConnection) url.openConnection();
 
-                try (InputStream inputStream = connection.getInputStream();){
+                try (InputStream inputStream = connection.getInputStream();) {
                     bitmap = BitmapFactory.decodeStream(inputStream);
                     bitmaps.put(params[0], bitmap);
                 } catch (IOException e) {
